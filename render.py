@@ -8,8 +8,9 @@ Usage:
 Queue file: a JSON list of items:
     {"id": "<notion page id>", "text": "The note text",
      "template": "quote",          # optional; otherwise templates rotate
-     "format": "substack",         # optional: "square" (1080x1080, Facebook/Instagram, default)
-                                   #           or "substack" (1456x1048 banner)
+     "format": "substack",         # optional: "square" (1080x1080, Facebook/Instagram, default),
+                                   #   "substack" (1456x1048 post cover / Notes image)
+                                   #   or "inline" (1460x730, an image inside a newsletter)
      "label": "Dear Mom"}          # optional: shown under the name instead of the domain
 
 If an item has no template, templates rotate in order (the last one used is kept in
@@ -51,6 +52,7 @@ SANS_MEDIUM = os.path.join(FONTS, "Inter-Medium.otf")
 SANS_SEMIBOLD = os.path.join(FONTS, "Inter-SemiBold.otf")
 SANS_BOLD = os.path.join(FONTS, "Inter-Bold.otf")
 
+FORMATS = ("square", "substack", "inline")
 TEMPLATE_ORDER = ["classic", "quote", "grid", "gold", "spotlight", "paper"]
 
 
@@ -139,10 +141,10 @@ class Frame:
     s scales type and spacing so templates look the same in every format.
     """
 
-    def __init__(self, name, W, H, x0, y0, x1, y1):
+    def __init__(self, name, W, H, x0, y0, x1, y1, s=None):
         self.name, self.W, self.H = name, W, H
         self.x0, self.y0, self.x1, self.y1 = x0, y0, x1, y1
-        self.s = (y1 - y0) / 880
+        self.s = s if s is not None else (y1 - y0) / 880
 
     @property
     def w(self):
@@ -161,6 +163,12 @@ def make_frame(fmt):
         sw, sh = 1100, 780
         x0, y0 = (W - sw) // 2 + 50, (H - sh) // 2 + 40
         return Frame("substack", W, H, x0, y0, W - x0, H - y0)
+    if fmt == "inline":
+        # 1460x730 (2:1): an image inside a newsletter. Substack posts are 730 px wide,
+        # so this is drawn at twice that width to stay sharp on high-resolution screens.
+        # Inline images are not cropped, so the whole canvas is usable.
+        W, H = 1460, 730
+        return Frame("inline", W, H, 110, 80, W - 110, H - 80, s=0.85)
     W, H = SIZE
     return Frame("square", W, H, MARGIN, MARGIN, W - MARGIN, H - MARGIN)
 
@@ -318,7 +326,7 @@ def main():
     ap.add_argument("--out", default="out")
     ap.add_argument("--all-templates", action="store_true", help="preview: render every item in every template")
     ap.add_argument("--no-state", action="store_true", help="don't read or update state.json")
-    ap.add_argument("--format", default="square", choices=["square", "substack"],
+    ap.add_argument("--format", default="square", choices=list(FORMATS),
                     help="default format for items that don't set one")
     args = ap.parse_args()
 
@@ -342,11 +350,11 @@ def main():
             state["last_template"] = t
             chosen = [t]
         fmt = item.get("format", args.format)
-        if fmt not in ("square", "substack"):
+        if fmt not in FORMATS:
             fmt = "square"
         frame = make_frame(fmt)
         label = item.get("label")
-        suffix = "" if fmt == "square" else "-substack"
+        suffix = "" if fmt == "square" else f"-{fmt}"
         for t in chosen:
             img, size, too_long = TEMPLATES[t](text, frame, label)
             filename = f"{item_id}{suffix}__{t}.png" if args.all_templates else f"{item_id}{suffix}.png"

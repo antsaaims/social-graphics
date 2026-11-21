@@ -13,7 +13,7 @@ uploads them to Cloudinary, and records the public links so Claude can schedule 
    [{"id": "<notion page id>", "text": "The note text",
      "template": "quote", "format": "substack", "label": "Dear Mom"}]
    ```
-   `template`, `format` (`square` by default, or `substack`) and `label` (shown under the name
+   `template`, `format` (`square` by default, `substack` or `inline`) and `label` (shown under the name
    instead of the domain, e.g. the Substack publication) are optional. Without it, templates rotate in order so two posts in a row never look alike
    (the last one used is kept in `state.json`).
 3. The GitHub Action renders one PNG per note, uploads it to Cloudinary as
@@ -41,6 +41,7 @@ Emoji are removed because the fonts can't draw them.
 | Format | Size | Use |
 |---|---|---|
 | `square` | 1080×1080 | Facebook and Instagram |
+| `inline` | 1460×730 | Images inside a newsletter. Substack posts are 730 px wide, so this is drawn at twice that width to stay sharp. Best for short pull quotes. |
 | `substack` | 1456×1048 | Substack post covers and Notes images. Substack crops this image differently in the feed, app, email and link previews, so all text stays inside the centre area that survives both a square crop and a 1.91:1 crop. |
 
 Brand colours, name, domain and the square size are at the top of `render.py`
@@ -52,6 +53,7 @@ Brand colours, name, domain and the square size are at the top of `render.py`
 pip install -r requirements.txt
 python render.py --queue samples/samples.json --out previews --all-templates --no-state
 python render.py --queue samples/samples-substack.json --out previews --all-templates --no-state
+python render.py --queue samples/samples-inline.json --out previews --all-templates --no-state
 ```
 
 ## Setup (once)

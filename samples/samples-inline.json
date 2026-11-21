@@ -1,0 +1,5 @@
+[
+  {"id": "sample-short", "format": "inline", "label": "The Student Success Journey", "text": "Your advisor is not a mind reader.\nSend the email."},
+  {"id": "sample-medium", "format": "inline", "text": "Grad school tip: before you open your laptop, write down the one thing that would make today a good research day. Do that first, even if it only takes 25 minutes."},
+  {"id": "sample-long", "format": "inline", "label": "Dear Mom", "text": "Nobody tells you this in your first year: confusion is not a sign that you are in the wrong program. It is the job.\n\nEvery result you will ever be proud of started as a page of questions you could not answer yet. Write the questions down, date them, and come back in a month."}
+]
