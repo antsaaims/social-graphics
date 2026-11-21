@@ -50,6 +50,7 @@ def main():
             "id": entry.get("id"),
             "template": entry["template"],
             "format": entry.get("format", "square"),
+            "slide": entry.get("slide"),
             "url": res["secure_url"],
             "public_id": res["public_id"],
             "warnings": entry.get("warnings", []),

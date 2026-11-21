@@ -10,7 +10,8 @@ Queue file: a JSON list of items:
      "template": "quote",          # optional; otherwise templates rotate
      "format": "substack",         # optional: "square" (1080x1080, Facebook/Instagram, default),
                                    #   "substack" (1456x1048 post cover / Notes image)
-                                   #   or "inline" (1460x730, an image inside a newsletter)
+                                   #   "inline" (1460x730, an image inside a newsletter)
+                                   #   or "carousel" (1080x1350 slides; see carousel.py for "slides")
      "label": "Dear Mom"}          # optional: shown under the name instead of the domain
 
 If an item has no template, templates rotate in order (the last one used is kept in
@@ -52,7 +53,7 @@ SANS_MEDIUM = os.path.join(FONTS, "Inter-Medium.otf")
 SANS_SEMIBOLD = os.path.join(FONTS, "Inter-SemiBold.otf")
 SANS_BOLD = os.path.join(FONTS, "Inter-Bold.otf")
 
-FORMATS = ("square", "substack", "inline")
+FORMATS = ("square", "substack", "inline", "carousel")
 TEMPLATE_ORDER = ["classic", "quote", "grid", "gold", "spotlight", "paper"]
 
 
@@ -338,9 +339,20 @@ def main():
     manifest = []
     for item in items:
         text, warnings = clean_text(item.get("text", ""))
-        if not text:
+        if not text and item.get("format") != "carousel":
             continue
         item_id = safe_name(str(item.get("id", f"post-{len(manifest) + 1}")))
+        if item.get("format") == "carousel":
+            import carousel
+            slides = item.get("slides") or []
+            if not slides:
+                continue
+            for k, img in enumerate(carousel.render_carousel(slides, NAME, item.get("label") or DOMAIN), 1):
+                filename = f"{item_id}-carousel-{k:02d}.png"
+                img.save(os.path.join(args.out, filename), "PNG", optimize=True)
+                manifest.append({"id": item.get("id"), "file": filename, "format": "carousel", "template": "carousel",
+                                 "slide": k, "slides": len(slides), "font_size": None, "warnings": warnings})
+            continue
         if args.all_templates:
             chosen = TEMPLATE_ORDER
         else:

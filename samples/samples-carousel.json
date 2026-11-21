@@ -1,0 +1,8 @@
+[
+  {"id": "sample", "format": "carousel", "label": "The Student Success Journey", "slides": [
+    {"type": "cover", "title": "How do you study one week before finals?", "subtitle": "Stop rereading your summaries."},
+    {"type": "point", "headline": "Turn them into", "accent": "questions", "body": "We don't like making mistakes, and that's exactly why testing yourself works.", "kicker": "You try to answer, you get it wrong, you check, and your brain holds on to it."},
+    {"type": "point", "headline": "It's called", "accent": "error-based learning", "body": "Tonight: take one chapter and write 10 question-and-answer flashcards. Tomorrow, quiz yourself before you look.", "kicker": "Free apps like Space and Anki Universal space the practice for you."},
+    {"type": "end", "quote": "Getting it wrong this week is the point."}
+  ]}
+]

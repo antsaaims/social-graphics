@@ -42,6 +42,7 @@ Emoji are removed because the fonts can't draw them.
 |---|---|---|
 | `square` | 1080×1080 | Facebook and Instagram |
 | `inline` | 1460×730 | Images inside a newsletter. Substack posts are 730 px wide, so this is drawn at twice that width to stay sharp. Best for short pull quotes. |
+| `carousel` | 1080×1350 per slide | Multi-slide posts (Facebook/Instagram). One idea per slide, bold capitals plus a handwritten accent phrase, and hand-drawn gold arrows that cross from one slide into the next so readers keep swiping. See `carousel.py` for the slide types (`cover`, `point`, `end`) and optional photo backgrounds (`"background"`, shown under a navy overlay). Files are named `<id>-carousel-01.png`, `-02`, … in order. |
 | `substack` | 1456×1048 | Substack post covers and Notes images. Substack crops this image differently in the feed, app, email and link previews, so all text stays inside the centre area that survives both a square crop and a 1.91:1 crop. |
 
 Brand colours, name, domain and the square size are at the top of `render.py`
@@ -54,6 +55,7 @@ pip install -r requirements.txt
 python render.py --queue samples/samples.json --out previews --all-templates --no-state
 python render.py --queue samples/samples-substack.json --out previews --all-templates --no-state
 python render.py --queue samples/samples-inline.json --out previews --all-templates --no-state
+python render.py --queue samples/samples-carousel.json --out previews --no-state
 ```
 
 ## Setup (once)
@@ -64,4 +66,4 @@ Secrets and variables → Actions → New repository secret*.
 
 ## Fonts
 
-DM Serif Display and Inter, both under the SIL Open Font License (licences in `fonts/`).
+DM Serif Display, Inter and Caveat Brush, all under the SIL Open Font License (licences in `fonts/`).
