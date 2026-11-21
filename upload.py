@@ -3,7 +3,8 @@ Upload the graphics listed in <out>/manifest.json to Cloudinary and record the p
 
 Needs the CLOUDINARY_URL environment variable (cloudinary://<api_key>:<api_secret>@<cloud_name>),
 stored as a GitHub Actions secret. Each image is saved as social-graphics/<notion page id>,
-so re-rendering the same note replaces its old image instead of making a duplicate.
+so re-rendering the same note replaces its old image instead of making a duplicate
+(Substack banners get a "-substack" suffix).
 
 Writes results/<run-id>.json and results/latest.json:
     [{"id": ..., "template": ..., "url": "https://res.cloudinary.com/...", "warnings": [...]}]
@@ -42,12 +43,13 @@ def main():
             overwrite=True,
             invalidate=True,
             resource_type="image",
-            tags=["social-graphics", f"template-{entry['template']}"],
+            tags=["social-graphics", f"template-{entry['template']}", f"format-{entry.get('format', 'square')}"],
             context={"notion_id": str(entry.get("id", "")), "template": entry["template"]},
         )
         results.append({
             "id": entry.get("id"),
             "template": entry["template"],
+            "format": entry.get("format", "square"),
             "url": res["secure_url"],
             "public_id": res["public_id"],
             "warnings": entry.get("warnings", []),

@@ -1,6 +1,7 @@
 # social-graphics
 
-Turns Antsa's approved Facebook and Instagram text notes into branded 1080×1080 graphics,
+Turns Antsa's approved text notes into branded graphics (1080×1080 squares for Facebook and
+Instagram, 1456×1048 banners for Substack),
 uploads them to Cloudinary, and records the public links so Claude can schedule them in Buffer.
 
 ## How it works
@@ -9,9 +10,11 @@ uploads them to Cloudinary, and records the public links so Claude can schedule 
    Facebook and/or Instagram and no Media URLs yet.
 2. Claude writes those notes to `queue/pending.json` and pushes:
    ```json
-   [{"id": "<notion page id>", "text": "The note text", "template": "quote"}]
+   [{"id": "<notion page id>", "text": "The note text",
+     "template": "quote", "format": "substack", "label": "Dear Mom"}]
    ```
-   `template` is optional. Without it, templates rotate in order so two posts in a row never look alike
+   `template`, `format` (`square` by default, or `substack`) and `label` (shown under the name
+   instead of the domain, e.g. the Substack publication) are optional. Without it, templates rotate in order so two posts in a row never look alike
    (the last one used is kept in `state.json`).
 3. The GitHub Action renders one PNG per note, uploads it to Cloudinary as
    `social-graphics/<notion page id>`, writes the links to `results/latest.json`
@@ -33,7 +36,14 @@ uploads them to Cloudinary, and records the public links so Claude can schedule 
 Text size adjusts to fit each note. Notes too long for the smallest size get a warning in the results.
 Emoji are removed because the fonts can't draw them.
 
-Brand colours, name, domain and canvas size are at the top of `render.py`
+## Formats
+
+| Format | Size | Use |
+|---|---|---|
+| `square` | 1080×1080 | Facebook and Instagram |
+| `substack` | 1456×1048 | Substack post covers and Notes images. Substack crops this image differently in the feed, app, email and link previews, so all text stays inside the centre area that survives both a square crop and a 1.91:1 crop. |
+
+Brand colours, name, domain and the square size are at the top of `render.py`
 (set `SIZE = (1080, 1350)` for Instagram portrait).
 
 ## Preview locally
@@ -41,6 +51,7 @@ Brand colours, name, domain and canvas size are at the top of `render.py`
 ```bash
 pip install -r requirements.txt
 python render.py --queue samples/samples.json --out previews --all-templates --no-state
+python render.py --queue samples/samples-substack.json --out previews --all-templates --no-state
 ```
 
 ## Setup (once)

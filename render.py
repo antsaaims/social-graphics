@@ -6,7 +6,11 @@ Usage:
     python render.py --queue samples/samples.json --out previews --all-templates
 
 Queue file: a JSON list of items:
-    {"id": "<notion page id>", "text": "The note text", "template": "quote"}   # template optional
+    {"id": "<notion page id>", "text": "The note text",
+     "template": "quote",          # optional; otherwise templates rotate
+     "format": "substack",         # optional: "square" (1080x1080, Facebook/Instagram, default)
+                                   #           or "substack" (1456x1048 banner)
+     "label": "Dear Mom"}          # optional: shown under the name instead of the domain
 
 If an item has no template, templates rotate in order (the last one used is kept in
 state.json) so two posts in a row never look the same.
@@ -128,114 +132,147 @@ def draw_block(draw, lines, fnt, line_h, box, fill, align="left", valign="center
     return cy
 
 
-def footer(draw, W, H, name_color, domain_color, align="left", y=None, divider=None):
-    """Name + domain signature at the bottom."""
-    f_name = font(SANS_SEMIBOLD, 34)
-    f_dom = font(SANS, 26)
-    y = y if y is not None else H - MARGIN - 70
+# ---------------------------------------------------------------- formats
+class Frame:
+    """Canvas plus the 'safe' content area. Everything important is drawn inside x0..x1, y0..y1.
+
+    s scales type and spacing so templates look the same in every format.
+    """
+
+    def __init__(self, name, W, H, x0, y0, x1, y1):
+        self.name, self.W, self.H = name, W, H
+        self.x0, self.y0, self.x1, self.y1 = x0, y0, x1, y1
+        self.s = (y1 - y0) / 880
+
+    @property
+    def w(self):
+        return self.x1 - self.x0
+
+    def u(self, v):
+        return int(round(v * self.s))
+
+
+def make_frame(fmt):
+    if fmt == "substack":
+        # 1456x1048 (Substack's recommended post/social preview size). Substack crops this image
+        # differently in the feed, app, email and link previews, so text stays in the centre
+        # ~1100x780 that survives the square and 1.91:1 crops.
+        W, H = 1456, 1048
+        sw, sh = 1100, 780
+        x0, y0 = (W - sw) // 2 + 50, (H - sh) // 2 + 40
+        return Frame("substack", W, H, x0, y0, W - x0, H - y0)
+    W, H = SIZE
+    return Frame("square", W, H, MARGIN, MARGIN, W - MARGIN, H - MARGIN)
+
+
+def footer(d, f, name_color, domain_color, label=None, align="left", divider=None):
+    """Name + domain (or publication name) signature at the bottom of the safe area."""
+    f_name = font(SANS_SEMIBOLD, max(26, f.u(34)))
+    f_dom = font(SANS, max(20, f.u(26)))
+    second = label or DOMAIN
+    y = f.y1 - f.u(70)
+    cx = f.x0 + f.w / 2
     if divider:
         if align == "left":
-            draw.line([(MARGIN, y - 34), (MARGIN + 80, y - 34)], fill=divider, width=4)
+            d.line([(f.x0, y - f.u(34)), (f.x0 + f.u(80), y - f.u(34))], fill=divider, width=4)
         else:
-            draw.line([(W / 2 - 40, y - 34), (W / 2 + 40, y - 34)], fill=divider, width=4)
+            d.line([(cx - f.u(40), y - f.u(34)), (cx + f.u(40), y - f.u(34))], fill=divider, width=4)
     if align == "left":
-        draw.text((MARGIN, y), NAME, font=f_name, fill=name_color)
-        draw.text((MARGIN, y + 44), DOMAIN, font=f_dom, fill=domain_color)
+        d.text((f.x0, y), NAME, font=f_name, fill=name_color)
+        d.text((f.x0, y + f.u(44)), second, font=f_dom, fill=domain_color)
     else:
-        draw.text(((W - f_name.getlength(NAME)) / 2, y), NAME, font=f_name, fill=name_color)
-        draw.text(((W - f_dom.getlength(DOMAIN)) / 2, y + 44), DOMAIN, font=f_dom, fill=domain_color)
+        d.text((cx - f_name.getlength(NAME) / 2, y), NAME, font=f_name, fill=name_color)
+        d.text((cx - f_dom.getlength(second) / 2, y + f.u(44)), second, font=f_dom, fill=domain_color)
 
 
 # ---------------------------------------------------------------- templates
-# Each template draws on a fresh canvas and returns (image, font_size, too_long).
+# Each template gets the text, a Frame and an optional label (shown instead of the domain),
+# and returns (image, font_size, too_long).
 
-def t_classic(text):
+def t_classic(text, f, label=None):
     """The original layout: name + domain header, divider, centred body."""
-    W, H = SIZE
-    img = Image.new("RGB", SIZE, NAVY)
+    img = Image.new("RGB", (f.W, f.H), NAVY)
     d = ImageDraw.Draw(img)
-    d.text((MARGIN, 110), NAME, font=font(SANS_SEMIBOLD, 36), fill=GOLD)
-    d.text((MARGIN, 158), DOMAIN, font=font(SANS, 28), fill=SKY)
-    d.line([(MARGIN, 225), (W - MARGIN, 225)], fill=STEEL, width=3)
-    box = (MARGIN, 270, W - 2 * MARGIN, H - 270 - MARGIN)
-    fnt, lines, lh, long_ = fit(text, SANS_MEDIUM, box[2], box[3], 58, 30)
+    d.text((f.x0, f.y0 + f.u(10)), NAME, font=font(SANS_SEMIBOLD, max(26, f.u(36))), fill=GOLD)
+    d.text((f.x0, f.y0 + f.u(58)), label or DOMAIN, font=font(SANS, max(20, f.u(28))), fill=SKY)
+    d.line([(f.x0, f.y0 + f.u(125)), (f.x1, f.y0 + f.u(125))], fill=STEEL, width=3)
+    box = (f.x0, f.y0 + f.u(170), f.w, f.y1 - f.y0 - f.u(170))
+    fnt, lines, lh, long_ = fit(text, SANS_MEDIUM, box[2], box[3], f.u(58), f.u(30))
     draw_block(d, lines, fnt, lh, box, GOLD)
     return img, fnt.size, long_
 
 
-def t_quote(text):
+def t_quote(text, f, label=None):
     """Big gold quotation mark, serif text, signature bottom-left."""
-    W, H = SIZE
-    img = Image.new("RGB", SIZE, NAVY)
+    img = Image.new("RGB", (f.W, f.H), NAVY)
     d = ImageDraw.Draw(img)
-    d.text((MARGIN - 12, 40), "“", font=font(SERIF, 300), fill=GOLD)
-    box = (MARGIN, 270, W - 2 * MARGIN, H - 270 - 240)
-    fnt, lines, lh, long_ = fit(text, SERIF, box[2], box[3], 72, 34, spacing=1.28)
+    d.text((f.x0 - f.u(12), f.y0 - f.u(60)), "“", font=font(SERIF, f.u(300)), fill=GOLD)
+    box = (f.x0, f.y0 + f.u(170), f.w, f.y1 - f.y0 - f.u(170) - f.u(140))
+    fnt, lines, lh, long_ = fit(text, SERIF, box[2], box[3], f.u(72), f.u(34), spacing=1.28)
     draw_block(d, lines, fnt, lh, box, (255, 255, 255))
-    footer(d, W, H, GOLD, SKY, divider=SKY)
+    footer(d, f, GOLD, SKY, label, divider=SKY)
     return img, fnt.size, long_
 
 
-def t_grid(text):
+def t_grid(text, f, label=None):
     """Graph-paper grid (a nod to math), sky-blue accent bar, bold sans text."""
-    W, H = SIZE
-    img = Image.new("RGB", SIZE, NAVY)
+    img = Image.new("RGB", (f.W, f.H), NAVY)
     d = ImageDraw.Draw(img)
     step = 54
-    for x in range(0, W + 1, step):
-        d.line([(x, 0), (x, H)], fill=(19, 36, 62), width=1)
-    for y in range(0, H + 1, step):
-        d.line([(0, y), (W, y)], fill=(19, 36, 62), width=1)
-    box = (MARGIN + 44, 150, W - 2 * MARGIN - 44, H - 150 - 260)
-    fnt, lines, lh, long_ = fit(text, SANS_SEMIBOLD, box[2], box[3], 60, 30, spacing=1.32)
+    for x in range(0, f.W + 1, step):
+        d.line([(x, 0), (x, f.H)], fill=(19, 36, 62), width=1)
+    for y in range(0, f.H + 1, step):
+        d.line([(0, y), (f.W, y)], fill=(19, 36, 62), width=1)
+    bar = f.u(44)
+    box = (f.x0 + bar, f.y0 + f.u(50), f.w - bar, f.y1 - f.y0 - f.u(50) - f.u(160))
+    fnt, lines, lh, long_ = fit(text, SANS_SEMIBOLD, box[2], box[3], f.u(60), f.u(30), spacing=1.32)
     end = draw_block(d, lines, fnt, lh, box, GOLD)
     top = box[1] + (box[3] - len(lines) * lh) // 2
-    d.rounded_rectangle([(MARGIN, top + 6), (MARGIN + 10, end - 6)], radius=5, fill=SKY)
-    footer(d, W, H, (255, 255, 255), SKY, divider=GOLD)
+    d.rounded_rectangle([(f.x0, top + 6), (f.x0 + max(6, f.u(10)), end - 6)], radius=5, fill=SKY)
+    footer(d, f, (255, 255, 255), SKY, label, divider=GOLD)
     return img, fnt.size, long_
 
 
-def t_gold(text):
+def t_gold(text, f, label=None):
     """Inverted: gold background, navy serif text, thin navy frame."""
-    W, H = SIZE
-    img = Image.new("RGB", SIZE, GOLD)
+    img = Image.new("RGB", (f.W, f.H), GOLD)
     d = ImageDraw.Draw(img)
-    inset = 44
-    d.rectangle([(inset, inset), (W - inset, H - inset)], outline=NAVY, width=3)
-    box = (MARGIN + 10, 150, W - 2 * MARGIN - 20, H - 150 - 250)
-    fnt, lines, lh, long_ = fit(text, SERIF, box[2], box[3], 70, 34, spacing=1.28)
+    pad = f.u(56)
+    d.rectangle([(f.x0 - pad, f.y0 - pad), (f.x1 + pad, f.y1 + pad)], outline=NAVY, width=3)
+    box = (f.x0 + f.u(10), f.y0 + f.u(50), f.w - f.u(20), f.y1 - f.y0 - f.u(50) - f.u(150))
+    fnt, lines, lh, long_ = fit(text, SERIF, box[2], box[3], f.u(70), f.u(34), spacing=1.28)
     draw_block(d, lines, fnt, lh, box, NAVY, align="center")
-    footer(d, W, H, NAVY, (25, 92, 140), align="center", divider=NAVY)
+    footer(d, f, NAVY, (25, 92, 140), label, align="center", divider=NAVY)
     return img, fnt.size, long_
 
 
-def t_spotlight(text):
-    """Soft sky-blue circle in the corner, small gold dot, left-aligned text."""
-    W, H = SIZE
-    img = Image.new("RGB", SIZE, NAVY)
+def t_spotlight(text, f, label=None):
+    """Soft blue circle in the lower right, small gold dot, bold white text."""
+    img = Image.new("RGB", (f.W, f.H), NAVY)
     d = ImageDraw.Draw(img)
-    r = 330
-    cx, cy = W - 60, H - 40
+    r = f.u(330)
+    cx, cy = f.x1 + f.u(40), f.y1 + f.u(60)
     d.ellipse([(cx - r, cy - r), (cx + r, cy + r)], fill=(16, 52, 84))
-    d.ellipse([(MARGIN, 120), (MARGIN + 26, 146)], fill=GOLD)
-    box = (MARGIN, 190, W - 2 * MARGIN, H - 190 - 250)
-    fnt, lines, lh, long_ = fit(text, SANS_BOLD, box[2], box[3], 64, 30, spacing=1.3)
+    dot = max(16, f.u(26))
+    d.ellipse([(f.x0, f.y0 + f.u(20)), (f.x0 + dot, f.y0 + f.u(20) + dot)], fill=GOLD)
+    box = (f.x0, f.y0 + f.u(90), f.w, f.y1 - f.y0 - f.u(90) - f.u(150))
+    fnt, lines, lh, long_ = fit(text, SANS_BOLD, box[2], box[3], f.u(64), f.u(30), spacing=1.3)
     draw_block(d, lines, fnt, lh, box, (255, 255, 255))
-    footer(d, W, H, GOLD, SKY, divider=GOLD)
+    footer(d, f, GOLD, SKY, label, divider=GOLD)
     return img, fnt.size, long_
 
 
-def t_paper(text):
+def t_paper(text, f, label=None):
     """Light version: paper white, navy serif text, gold underline, sky-blue domain."""
-    W, H = SIZE
-    img = Image.new("RGB", SIZE, CREAM)
+    img = Image.new("RGB", (f.W, f.H), CREAM)
     d = ImageDraw.Draw(img)
-    d.rectangle([(0, 0), (W, 18)], fill=NAVY)
-    box = (MARGIN, 150, W - 2 * MARGIN, H - 150 - 290)
-    fnt, lines, lh, long_ = fit(text, SERIF, box[2], box[3], 70, 34, spacing=1.28)
+    bar_y = 0 if f.name == "square" else f.y0 - f.u(90)
+    d.rectangle([(0, bar_y), (f.W, bar_y + 18)], fill=NAVY)
+    box = (f.x0, f.y0 + f.u(50), f.w, f.y1 - f.y0 - f.u(50) - f.u(190))
+    fnt, lines, lh, long_ = fit(text, SERIF, box[2], box[3], f.u(70), f.u(34), spacing=1.28)
     end = draw_block(d, lines, fnt, lh, box, NAVY)
-    d.line([(MARGIN, end + 28), (MARGIN + 140, end + 28)], fill=GOLD, width=8)
-    footer(d, W, H, NAVY, (14, 116, 166))
+    d.line([(f.x0, end + f.u(28)), (f.x0 + f.u(140), end + f.u(28))], fill=GOLD, width=max(5, f.u(8)))
+    footer(d, f, NAVY, (14, 116, 166), label)
     return img, fnt.size, long_
 
 
@@ -281,6 +318,8 @@ def main():
     ap.add_argument("--out", default="out")
     ap.add_argument("--all-templates", action="store_true", help="preview: render every item in every template")
     ap.add_argument("--no-state", action="store_true", help="don't read or update state.json")
+    ap.add_argument("--format", default="square", choices=["square", "substack"],
+                    help="default format for items that don't set one")
     args = ap.parse_args()
 
     with open(args.queue, encoding="utf-8") as f:
@@ -302,14 +341,21 @@ def main():
                 t = next_template(state.get("last_template"))
             state["last_template"] = t
             chosen = [t]
+        fmt = item.get("format", args.format)
+        if fmt not in ("square", "substack"):
+            fmt = "square"
+        frame = make_frame(fmt)
+        label = item.get("label")
+        suffix = "" if fmt == "square" else "-substack"
         for t in chosen:
-            img, size, too_long = TEMPLATES[t](text)
-            filename = f"{item_id}__{t}.png" if args.all_templates else f"{item_id}.png"
+            img, size, too_long = TEMPLATES[t](text, frame, label)
+            filename = f"{item_id}{suffix}__{t}.png" if args.all_templates else f"{item_id}{suffix}.png"
             img.save(os.path.join(args.out, filename), "PNG", optimize=True)
             w = list(warnings)
             if too_long:
                 w.append("text is long: drawn at the minimum size and may overflow; consider shortening")
-            manifest.append({"id": item.get("id"), "file": filename, "template": t, "font_size": size, "warnings": w})
+            manifest.append({"id": item.get("id"), "file": filename, "format": fmt, "template": t,
+                             "font_size": size, "warnings": w})
 
     with open(os.path.join(args.out, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
