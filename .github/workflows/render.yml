@@ -1,0 +1,65 @@
+name: Render and upload graphics
+
+# Runs when Claude pushes approved notes to queue/pending.json (or when started by hand).
+on:
+  push:
+    branches: [main]
+    paths: ["queue/pending.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: render
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check for queued notes
+        id: queue
+        run: |
+          count=$(python -c "import json;print(len(json.load(open('queue/pending.json'))))")
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Queued notes: $count"
+
+      - name: Render graphics
+        if: steps.queue.outputs.count != '0'
+        run: python render.py --queue queue/pending.json --out out
+
+      - name: Upload to Cloudinary
+        if: steps.queue.outputs.count != '0'
+        env:
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+        run: python upload.py --out out --results results
+
+      - name: Keep the PNGs as a downloadable artifact
+        if: steps.queue.outputs.count != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphics-${{ github.run_id }}
+          path: out/
+          retention-days: 14
+
+      - name: Archive the queue and commit results
+        if: steps.queue.outputs.count != '0'
+        run: |
+          mkdir -p queue/done
+          cp queue/pending.json "queue/done/$(date -u +%Y-%m-%d)-run${GITHUB_RUN_ID}.json"
+          echo "[]" > queue/pending.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add queue results state.json
+          git commit -m "Rendered graphics (run ${GITHUB_RUN_ID})"
+          git push
