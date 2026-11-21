@@ -1,0 +1,18 @@
+[
+  {
+    "id": "41ea2795-6061-814b-9169-c9ac4c399dc8",
+    "template": "classic",
+    "format": "square",
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795295865/social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8.png",
+    "public_id": "social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8",
+    "warnings": []
+  },
+  {
+    "id": "41ea2795-6061-814b-9169-c9ac4c399dc8",
+    "template": "quote",
+    "format": "substack",
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795295866/social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8-substack.png",
+    "public_id": "social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8-substack",
+    "warnings": []
+  }
+]
