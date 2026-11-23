@@ -1,18 +1,92 @@
 [
   {
-    "id": "41ea2795-6061-814b-9169-c9ac4c399dc8",
-    "template": "classic",
+    "id": "417a2795-6061-81f0-a9cb-dfe64e0f754b",
+    "template": "grid",
     "format": "square",
-    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795295865/social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8.png",
-    "public_id": "social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393573/social-graphics/417a2795-6061-81f0-a9cb-dfe64e0f754b.png",
+    "public_id": "social-graphics/417a2795-6061-81f0-a9cb-dfe64e0f754b",
     "warnings": []
   },
   {
-    "id": "41ea2795-6061-814b-9169-c9ac4c399dc8",
+    "id": "417a2795-6061-8170-bcc0-fe092e8ada1e",
+    "template": "gold",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393574/social-graphics/417a2795-6061-8170-bcc0-fe092e8ada1e.png",
+    "public_id": "social-graphics/417a2795-6061-8170-bcc0-fe092e8ada1e",
+    "warnings": []
+  },
+  {
+    "id": "417a2795-6061-8112-a5a9-e571c979c174",
+    "template": "spotlight",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393574/social-graphics/417a2795-6061-8112-a5a9-e571c979c174.png",
+    "public_id": "social-graphics/417a2795-6061-8112-a5a9-e571c979c174",
+    "warnings": []
+  },
+  {
+    "id": "41ea2795-6061-8143-b451-fa2333bdb12d",
+    "template": "paper",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393575/social-graphics/41ea2795-6061-8143-b451-fa2333bdb12d.png",
+    "public_id": "social-graphics/41ea2795-6061-8143-b451-fa2333bdb12d",
+    "warnings": []
+  },
+  {
+    "id": "41ea2795-6061-81a3-9dd1-f45f01fb0a0b",
+    "template": "classic",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393575/social-graphics/41ea2795-6061-81a3-9dd1-f45f01fb0a0b.png",
+    "public_id": "social-graphics/41ea2795-6061-81a3-9dd1-f45f01fb0a0b",
+    "warnings": []
+  },
+  {
+    "id": "417a2795-6061-819e-ac71-df98d9f64342",
     "template": "quote",
-    "format": "substack",
-    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795295866/social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8-substack.png",
-    "public_id": "social-graphics/41ea2795-6061-814b-9169-c9ac4c399dc8-substack",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393576/social-graphics/417a2795-6061-819e-ac71-df98d9f64342.png",
+    "public_id": "social-graphics/417a2795-6061-819e-ac71-df98d9f64342",
+    "warnings": []
+  },
+  {
+    "id": "41ea2795-6061-8146-a4d5-c3ffeafcf979",
+    "template": "grid",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393577/social-graphics/41ea2795-6061-8146-a4d5-c3ffeafcf979.png",
+    "public_id": "social-graphics/41ea2795-6061-8146-a4d5-c3ffeafcf979",
+    "warnings": []
+  },
+  {
+    "id": "410a2795-6061-815a-8578-e6769fd42e81",
+    "template": "gold",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393577/social-graphics/410a2795-6061-815a-8578-e6769fd42e81.png",
+    "public_id": "social-graphics/410a2795-6061-815a-8578-e6769fd42e81",
+    "warnings": []
+  },
+  {
+    "id": "41ea2795-6061-8130-b12e-f5f235dca0a3",
+    "template": "spotlight",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393578/social-graphics/41ea2795-6061-8130-b12e-f5f235dca0a3.png",
+    "public_id": "social-graphics/41ea2795-6061-8130-b12e-f5f235dca0a3",
+    "warnings": []
+  },
+  {
+    "id": "41ea2795-6061-81bc-b055-debf0ec6658b",
+    "template": "paper",
+    "format": "square",
+    "slide": null,
+    "url": "https://res.cloudinary.com/on9vcrxu/image/upload/v1795393578/social-graphics/41ea2795-6061-81bc-b055-debf0ec6658b.png",
+    "public_id": "social-graphics/41ea2795-6061-81bc-b055-debf0ec6658b",
     "warnings": []
   }
 ]
