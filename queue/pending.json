@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "417a2795-6061-81f0-a9cb-dfe64e0f754b",
+    "text": "The kindest thing you can offer is a little boring: good Wi-Fi, a quiet corner, and a couple of hours nobody plans over.",
+    "format": "square",
+    "label": "Dear Mom"
+  },
+  {
+    "id": "417a2795-6061-8170-bcc0-fe092e8ada1e",
+    "text": "In our family, we take turns choosing what to watch together.",
+    "format": "square",
+    "label": "Dear Mom"
+  },
+  {
+    "id": "417a2795-6061-8112-a5a9-e571c979c174",
+    "text": "One of my teachers told me why jobs are posted so early: so the school doesn't end up with \"leftover candidates.\"",
+    "format": "square",
+    "label": "The Student Success Journey"
+  },
+  {
+    "id": "41ea2795-6061-8143-b451-fa2333bdb12d",
+    "text": "Don't jump to advice. Listen.",
+    "format": "square",
+    "label": "Dear Mom"
+  },
+  {
+    "id": "41ea2795-6061-81a3-9dd1-f45f01fb0a0b",
+    "text": "Here's advice I got in my Preparing for the Professoriate class: say what you do, not what you think people should do.",
+    "format": "square",
+    "label": "The Student Success Journey"
+  },
+  {
+    "id": "417a2795-6061-819e-ac71-df98d9f64342",
+    "text": "The hidden rule: your university may already host tools you've never heard of.",
+    "format": "square",
+    "label": "The Student Success Journey"
+  },
+  {
+    "id": "41ea2795-6061-8146-a4d5-c3ffeafcf979",
+    "text": "Celebrate the submission. It's the part your child controls.",
+    "format": "square",
+    "label": "Dear Mom"
+  },
+  {
+    "id": "410a2795-6061-815a-8578-e6769fd42e81",
+    "text": "Knowing I'll present is the accountability I needed. I can't skim when someone will ask me a question.",
+    "format": "square",
+    "label": "The Student Success Journey"
+  },
+  {
+    "id": "41ea2795-6061-8130-b12e-f5f235dca0a3",
+    "text": "A post I keep thinking about: \"The Costly Mistake of Holding On When You Should Be Moving On\" by Sandy Franks.",
+    "format": "square",
+    "label": "Dear Mom"
+  },
+  {
+    "id": "41ea2795-6061-81bc-b055-debf0ec6658b",
+    "text": "One of the main reasons people don't help you isn't that they don't care.",
+    "format": "square",
+    "label": "The Student Success Journey"
+  }
+]
